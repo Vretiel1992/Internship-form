@@ -7,6 +7,20 @@
 
 import UIKit
 
+private enum StateBottomView {
+    case closed
+    case open
+}
+
+extension StateBottomView {
+    var opposite: StateBottomView {
+        switch self {
+        case .open: return .closed
+        case .closed: return .open
+        }
+    }
+}
+
 class MainViewController: UIViewController {
 
     // MARK: - Public Properties
@@ -18,7 +32,6 @@ class MainViewController: UIViewController {
     private lazy var backgroundImage: UIImageView = {
         let imageView = UIImageView()
         imageView.image = Constants.Images.mainImage
-        imageView.contentMode = .top
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -94,12 +107,37 @@ class MainViewController: UIViewController {
         return button
     }()
 
+    private var bottomConstraintBottomImageView = NSLayoutConstraint()
+    private var heightConstraintBottomImageView = NSLayoutConstraint()
+
+    private var popUpOffset: CGFloat = 0
+    private var heightStatusBar: CGFloat = 0
+    private var currentBottomViewState: StateBottomView = .closed
+
+    private var runningAnimators = [UIViewPropertyAnimator]()
+    private var animationProgress = [CGFloat]()
+
+    private lazy var panRecognizer: UIPanGestureRecognizer = {
+        let recognizer = UIPanGestureRecognizer()
+        recognizer.addTarget(self, action: #selector(popUpViewPanned(recognizer:)))
+        return recognizer
+    }()
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupConstraints()
+        setupGesture()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        heightStatusBar = view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
+        popUpOffset = view.bounds.height - 510 - heightStatusBar
+        bottomConstraintBottomImageView.constant = popUpOffset
+        heightConstraintBottomImageView.constant = view.bounds.height - heightStatusBar
     }
 
     // MARK: - Private Methods
@@ -115,29 +153,112 @@ class MainViewController: UIViewController {
     }
 
     private func setupConstraints() {
+        bottomConstraintBottomImageView = bottomMainView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        heightConstraintBottomImageView = bottomMainView.heightAnchor.constraint(equalToConstant: 510)
         NSLayoutConstraint.activate([
             backgroundImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             backgroundImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             backgroundImage.topAnchor.constraint(equalTo: view.topAnchor),
-            backgroundImage.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            backgroundImage.heightAnchor.constraint(equalToConstant: round(view.bounds.width * 1.6373)),
 
             bottomMainView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMainView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomMainView.topAnchor.constraint(equalTo: view.topAnchor, constant: 302),
-            bottomMainView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            bottomConstraintBottomImageView,
+            heightConstraintBottomImageView,
 
             collectionView.leadingAnchor.constraint(equalTo: bottomMainView.leadingAnchor, constant: 20),
             collectionView.trailingAnchor.constraint(equalTo: bottomMainView.trailingAnchor, constant: -20),
             collectionView.topAnchor.constraint(equalTo: bottomMainView.topAnchor, constant: 24),
             collectionView.heightAnchor.constraint(equalToConstant: 336),
 
-            bottomStackView.leadingAnchor.constraint(equalTo: bottomMainView.leadingAnchor, constant: 20),
-            bottomStackView.trailingAnchor.constraint(equalTo: bottomMainView.trailingAnchor, constant: -20),
-            bottomStackView.bottomAnchor.constraint(equalTo: bottomMainView.bottomAnchor),
+            bottomStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            bottomStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            bottomStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -58),
             bottomStackView.heightAnchor.constraint(equalToConstant: 60),
 
             doYouWantToJoinUsLabel.widthAnchor.constraint(equalToConstant: 92)
         ])
+    }
+
+    private func setupGesture() {
+        bottomMainView.addGestureRecognizer(panRecognizer)
+    }
+
+    private func animateTransitionIfNeeded(to state: StateBottomView, duration: TimeInterval) {
+        guard runningAnimators.isEmpty else { return }
+
+        let transitionAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 1, animations: {
+            switch state {
+            case .open:
+                self.bottomConstraintBottomImageView.constant = 0
+            case .closed:
+                self.bottomConstraintBottomImageView.constant = self.popUpOffset
+            }
+            self.view.layoutIfNeeded()
+        })
+
+        transitionAnimator.addCompletion { position in
+            switch position {
+            case .start:
+                self.currentBottomViewState = state.opposite
+            case .end:
+                self.currentBottomViewState = state
+            case .current:
+                ()
+            @unknown default:
+                fatalError()
+            }
+
+            switch self.currentBottomViewState {
+            case .open:
+                self.bottomConstraintBottomImageView.constant = 0
+            case .closed:
+                self.bottomConstraintBottomImageView.constant = self.popUpOffset
+            }
+
+            self.runningAnimators.removeAll()
+        }
+        transitionAnimator.startAnimation()
+        runningAnimators.append(transitionAnimator)
+    }
+
+    // MARK: - Object Methods
+
+    @objc private func popUpViewPanned(recognizer: UIPanGestureRecognizer) {
+        switch recognizer.state {
+        case .began:
+            animateTransitionIfNeeded(to: currentBottomViewState.opposite, duration: 1)
+            runningAnimators.forEach { $0.pauseAnimation() }
+            animationProgress = runningAnimators.map { $0.fractionComplete }
+        case .changed:
+            let translation = recognizer.translation(in: bottomMainView)
+            var fraction = -translation.y / popUpOffset
+            if currentBottomViewState == .open { fraction *= -1 }
+            if runningAnimators[0].isReversed { fraction *= -1 }
+            for (index, animator) in runningAnimators.enumerated() {
+                animator.fractionComplete = fraction + animationProgress[index]
+            }
+        case .ended:
+            let yVelocity = recognizer.velocity(in: bottomMainView).y
+            let shouldClose = yVelocity > 0
+            if yVelocity == 0 {
+                runningAnimators.forEach { $0.continueAnimation(withTimingParameters: nil, durationFactor: 0) }
+                break
+            }
+
+            switch currentBottomViewState {
+            case .open:
+                if !shouldClose && !runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+                if shouldClose && runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+            case .closed:
+                if shouldClose && !runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+                if !shouldClose && runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+            }
+
+            runningAnimators.forEach { $0.continueAnimation(withTimingParameters: nil, durationFactor: 0) }
+        default:
+            ()
+        }
     }
 }
 
