@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E43005AB299BA40500495DFA /* MainViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43005AA299BA40500495DFA /* MainViewPresenter.swift */; };
+		E43005AE299BAC7C00495DFA /* AssemblyBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43005AD299BAC7C00495DFA /* AssemblyBuilder.swift */; };
 		E4CB7DAE2995109600E1B5AE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB7DAD2995109600E1B5AE /* AppDelegate.swift */; };
 		E4CB7DB02995109600E1B5AE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB7DAF2995109600E1B5AE /* SceneDelegate.swift */; };
 		E4CB7DB22995109600E1B5AE /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB7DB12995109600E1B5AE /* MainViewController.swift */; };
@@ -24,6 +26,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E43005AA299BA40500495DFA /* MainViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewPresenter.swift; sourceTree = "<group>"; };
+		E43005AD299BAC7C00495DFA /* AssemblyBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyBuilder.swift; sourceTree = "<group>"; };
 		E4CB7DAA2995109600E1B5AE /* TestTaskSurf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestTaskSurf.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4CB7DAD2995109600E1B5AE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E4CB7DAF2995109600E1B5AE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -53,6 +57,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E43005AC299BAC5900495DFA /* AssemblyLayer */ = {
+			isa = PBXGroup;
+			children = (
+				E43005AD299BAC7C00495DFA /* AssemblyBuilder.swift */,
+			);
+			name = AssemblyLayer;
+			sourceTree = "<group>";
+		};
 		E4CB7DA12995109600E1B5AE = {
 			isa = PBXGroup;
 			children = (
@@ -73,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				E4D5ECB52999B02200999088 /* Application */,
+				E43005AC299BAC5900495DFA /* AssemblyLayer */,
 				E4D5ECB62999B0C900999088 /* PresentationLayer */,
 				E4D5ECCA2999B33200999088 /* Extensions */,
 			);
@@ -140,6 +153,7 @@
 		E4D5ECBA2999B10A00999088 /* Presenter */ = {
 			isa = PBXGroup;
 			children = (
+				E43005AA299BA40500495DFA /* MainViewPresenter.swift */,
 			);
 			path = Presenter;
 			sourceTree = "<group>";
@@ -244,8 +258,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E43005AE299BAC7C00495DFA /* AssemblyBuilder.swift in Sources */,
 				E4D5ECC72999B26500999088 /* Internship.swift in Sources */,
 				E4CB7DB22995109600E1B5AE /* MainViewController.swift in Sources */,
+				E43005AB299BA40500495DFA /* MainViewPresenter.swift in Sources */,
 				E4CB7DAE2995109600E1B5AE /* AppDelegate.swift in Sources */,
 				E4CB7DB02995109600E1B5AE /* SceneDelegate.swift in Sources */,
 				E4D5ECCE2999B38E00999088 /* SectionHeaderCollectionReusableView.swift in Sources */,

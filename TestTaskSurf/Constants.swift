@@ -23,6 +23,9 @@ enum Constants {
         static let empty = ""
         static let directionCell = "directionCell"
         static let sectionHeader = "sectionHeader"
+        static let alertTitle = "Поздравляем!"
+        static let alertMessage = "Ваша заявка успешно отправлена!"
+        static let alertClose = "Закрыть"
     }
 
     enum Fonts {

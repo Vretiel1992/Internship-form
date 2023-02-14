@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol MainViewProtocol: AnyObject {
+    func loadViewModel(viewModel: [Internship])
+    func showAlert()
+}
+
 private enum StateBottomView {
     case closed
     case open
@@ -21,11 +26,11 @@ extension StateBottomView {
     }
 }
 
-class MainViewController: UIViewController {
+final class MainViewController: UIViewController {
 
     // MARK: - Public Properties
-
-    let viewModel = Internship.viewModel
+    var presenter: MainViewPresenterProtocol?
+    var viewModel: [Internship] = []
 
     // MARK: - Private Properties
 
@@ -104,6 +109,9 @@ class MainViewController: UIViewController {
         config.cornerStyle = .capsule
         config.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 44, bottom: 20, trailing: 44)
         button.configuration = config
+        button.addAction(UIAction(handler: { _ in
+            self.presenter?.didTapSendRequestButton()
+        }), for: .touchUpInside)
         return button
     }()
 
@@ -130,6 +138,7 @@ class MainViewController: UIViewController {
         setupView()
         setupConstraints()
         setupGesture()
+        presenter?.viewDidLoad()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -378,5 +387,22 @@ extension MainViewController: UICollectionViewDataSource {
 extension MainViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 
+    }
+}
+
+// MARK: - MainViewProtocol
+
+extension MainViewController: MainViewProtocol {
+    func loadViewModel(viewModel: [Internship]) {
+        self.viewModel = viewModel
+        collectionView.reloadData()
+    }
+    
+    func showAlert() {
+        let alert = UIAlertController(title: Constants.Text.alertTitle,
+                                      message: Constants.Text.alertMessage,
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: Constants.Text.alertClose, style: .cancel))
+        present(alert, animated: true, completion: nil)
     }
 }
