@@ -11,6 +11,7 @@ protocol MainViewPresenterProtocol: AnyObject {
     init(view: MainViewProtocol)
     func viewDidLoad()
     func didTapSendRequestButton()
+    func didTapItem(indexPath: IndexPath)
 }
 
 final class MainViewPresenter: MainViewPresenterProtocol {
@@ -21,7 +22,7 @@ final class MainViewPresenter: MainViewPresenterProtocol {
 
     // MARK: - Private Properties
 
-    private var viewModel: [Internship] = []
+    private var internshipSections: [InternshipSection] = []
 
     // MARK: - Protocol Methods
 
@@ -37,10 +38,20 @@ final class MainViewPresenter: MainViewPresenterProtocol {
         view?.showAlert()
     }
 
+    func didTapItem(indexPath: IndexPath) {
+        updateViewModel(indexPath: indexPath)
+        view?.moveCellAndUpdateViewModel(indexPath: indexPath, updateViewModel: internshipSections)
+    }
+
     // MARK: - Private Methods
 
     private func getViewModel() {
-        viewModel = Internship.viewModel
-        view?.loadViewModel(viewModel: viewModel)
+        internshipSections = InternshipSection.internshipSections
+        view?.loadViewModel(viewModel: internshipSections)
+    }
+
+    private func updateViewModel(indexPath: IndexPath) {
+        let moveItem = internshipSections[indexPath.section].items.remove(at: indexPath.row)
+        internshipSections[indexPath.section].items.insert(moveItem, at: 0)
     }
 }

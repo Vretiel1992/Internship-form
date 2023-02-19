@@ -8,20 +8,23 @@
 import UIKit
 
 protocol MainViewProtocol: AnyObject {
-    func loadViewModel(viewModel: [Internship])
+    func loadViewModel(viewModel: [InternshipSection])
     func showAlert()
+    func moveCellAndUpdateViewModel(indexPath: IndexPath, updateViewModel: [InternshipSection])
 }
 
-private enum StateBottomView {
+private enum BottomViewState {
     case closed
     case open
 }
 
-extension StateBottomView {
-    var opposite: StateBottomView {
+extension BottomViewState {
+    var opposite: BottomViewState {
         switch self {
-        case .open: return .closed
-        case .closed: return .open
+        case .open:
+            return .closed
+        case .closed:
+            return .open
         }
     }
 }
@@ -29,19 +32,20 @@ extension StateBottomView {
 final class MainViewController: UIViewController {
 
     // MARK: - Public Properties
+
     var presenter: MainViewPresenterProtocol?
-    var viewModel: [Internship] = []
+    var internshipSections: [InternshipSection] = []
 
     // MARK: - Private Properties
 
-    private lazy var backgroundImage: UIImageView = {
+    private let backgroundImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = Constants.Images.mainImage
+        imageView.image = Constants.Images.mainBackgroundImage
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
 
-    private lazy var bottomMainView: UIView = {
+    private let bottomMainView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
         view.layer.maskedCorners = [
@@ -60,28 +64,30 @@ final class MainViewController: UIViewController {
         collectionView.backgroundColor = .clear
         collectionView.register(SectionHeaderCollectionReusableView.self,
                                 forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-                                withReuseIdentifier: Constants.Text.sectionHeader)
+                                withReuseIdentifier: Constants.Text.sectionHeaderIdentifier)
         collectionView.register(DirectionCollectionViewCell.self,
-                                forCellWithReuseIdentifier: Constants.Text.directionCell)
+                                forCellWithReuseIdentifier: Constants.Text.directionCellIdentifier)
         collectionView.dataSource = self
         collectionView.delegate = self
+        collectionView.isUserInteractionEnabled = true
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
 
-    private lazy var bottomStackView: UIStackView = {
+    private let bottomStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.spacing = 24
+        stackView.distribution = .equalSpacing
         stackView.alignment = .center
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
 
-    private lazy var doYouWantToJoinUsLabel: UILabel = {
+    private let bottomLabel: UILabel = {
         let label = UILabel()
         label.setupConfigure(
-            title: Constants.Text.doYouWantToJoinUs,
+            title: Constants.Text.bottomLabelTitle,
             lineHeightMultiple: 1.2,
             maximumLineHeight: 20,
             lineBreakMode: .byTruncatingTail,
@@ -92,10 +98,10 @@ final class MainViewController: UIViewController {
         return label
     }()
 
-    private lazy var sendRequestButton: UIButton = {
+    private lazy var bottomButton: UIButton = {
         let button = UIButton()
         var config = UIButton.Configuration.filled()
-        let title = Constants.Text.sendRequest
+        let title = Constants.Text.bottomButtonTitle
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineHeightMultiple = 1.05
         let attributeContainer = AttributeContainer([
@@ -109,21 +115,11 @@ final class MainViewController: UIViewController {
         config.cornerStyle = .capsule
         config.contentInsets = NSDirectionalEdgeInsets(top: 20, leading: 44, bottom: 20, trailing: 44)
         button.configuration = config
-        button.addAction(UIAction(handler: { _ in
-            self.presenter?.didTapSendRequestButton()
+        button.addAction(UIAction(handler: { [weak self] _ in
+            self?.presenter?.didTapSendRequestButton()
         }), for: .touchUpInside)
         return button
     }()
-
-    private var bottomConstraintBottomImageView = NSLayoutConstraint()
-    private var heightConstraintBottomImageView = NSLayoutConstraint()
-
-    private var popUpOffset: CGFloat = 0
-    private var heightStatusBar: CGFloat = 0
-    private var currentBottomViewState: StateBottomView = .closed
-
-    private var runningAnimators = [UIViewPropertyAnimator]()
-    private var animationProgress = [CGFloat]()
 
     private lazy var panRecognizer: UIPanGestureRecognizer = {
         let recognizer = UIPanGestureRecognizer()
@@ -131,11 +127,21 @@ final class MainViewController: UIViewController {
         return recognizer
     }()
 
+    private var lastSelectedIndexes: [Int: Int] = [:]
+
+    private var bottomConstraintBottomImageView = NSLayoutConstraint()
+    private var heightConstraintBottomImageView = NSLayoutConstraint()
+    private var popUpOffset: CGFloat = 0
+    private var heightStatusBar: CGFloat = 0
+    private var currentStateBottomView: BottomViewState = .closed
+    private var runningAnimators = [UIViewPropertyAnimator]()
+    private var animationProgress: [CGFloat] = []
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupView()
+        setupViews()
         setupConstraints()
         setupGesture()
         presenter?.viewDidLoad()
@@ -144,48 +150,75 @@ final class MainViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         heightStatusBar = view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
-        popUpOffset = view.bounds.height - 510 - heightStatusBar
+        popUpOffset = view.bounds.height - bottomMainView.frame.height - heightStatusBar
         bottomConstraintBottomImageView.constant = popUpOffset
         heightConstraintBottomImageView.constant = view.bounds.height - heightStatusBar
     }
 
     // MARK: - Private Methods
 
-    private func setupView() {
+    private func setupViews() {
         view.backgroundColor = .white
-        view.addSubview(backgroundImage)
+        view.addSubview(backgroundImageView)
         view.addSubview(bottomMainView)
         bottomMainView.addSubview(collectionView)
         view.addSubview(bottomStackView)
-        bottomStackView.addArrangedSubview(doYouWantToJoinUsLabel)
-        bottomStackView.addArrangedSubview(sendRequestButton)
+        bottomStackView.addArrangedSubview(bottomLabel)
+        bottomStackView.addArrangedSubview(bottomButton)
     }
 
     private func setupConstraints() {
         bottomConstraintBottomImageView = bottomMainView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        heightConstraintBottomImageView = bottomMainView.heightAnchor.constraint(equalToConstant: 510)
+        heightConstraintBottomImageView = bottomMainView.heightAnchor.constraint(
+            equalToConstant: Constants.Layout.bottomMainViewHeight
+        )
         NSLayoutConstraint.activate([
-            backgroundImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            backgroundImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            backgroundImage.topAnchor.constraint(equalTo: view.topAnchor),
-            backgroundImage.heightAnchor.constraint(equalToConstant: round(view.bounds.width * 1.6373)),
-
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.heightAnchor.constraint(
+                equalToConstant: round(view.bounds.width * Constants.Layout.aspectRatioToHeight)
+            ),
             bottomMainView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             bottomMainView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             bottomConstraintBottomImageView,
             heightConstraintBottomImageView,
 
-            collectionView.leadingAnchor.constraint(equalTo: bottomMainView.leadingAnchor, constant: 20),
-            collectionView.trailingAnchor.constraint(equalTo: bottomMainView.trailingAnchor, constant: -20),
-            collectionView.topAnchor.constraint(equalTo: bottomMainView.topAnchor, constant: 24),
-            collectionView.heightAnchor.constraint(equalToConstant: 336),
+            collectionView.leadingAnchor.constraint(
+                equalTo: bottomMainView.leadingAnchor,
+                constant: Constants.Layout.collectionViewLeftAndRight
+            ),
+            collectionView.trailingAnchor.constraint(
+                equalTo: bottomMainView.trailingAnchor,
+                constant: -Constants.Layout.collectionViewLeftAndRight
+            ),
+            collectionView.topAnchor.constraint(
+                equalTo: bottomMainView.topAnchor,
+                constant: Constants.Layout.collectionViewTop),
+            collectionView.heightAnchor.constraint(
+                equalToConstant: Constants.Layout.collectionViewHeight
+            ),
 
-            bottomStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            bottomStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            bottomStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -58),
-            bottomStackView.heightAnchor.constraint(equalToConstant: 60),
+            bottomStackView.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor,
+                constant: Constants.Layout.bottomStackViewLeftAndRight
+            ),
+            bottomStackView.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -Constants.Layout.bottomStackViewLeftAndRight),
+            bottomStackView.bottomAnchor.constraint(
+                equalTo: view.bottomAnchor,
+                constant: -Constants.Layout.bottomStackViewBot),
+            bottomStackView.heightAnchor.constraint(
+                equalToConstant: Constants.Layout.bottomStackViewHeight
+            ),
 
-            doYouWantToJoinUsLabel.widthAnchor.constraint(equalToConstant: 92)
+            bottomLabel.widthAnchor.constraint(
+                equalToConstant: Constants.Layout.bottomLabelWidth
+            ),
+            bottomButton.widthAnchor.constraint(
+                equalToConstant: Constants.Layout.bottomButtonWidth
+            )
         ])
     }
 
@@ -193,32 +226,37 @@ final class MainViewController: UIViewController {
         bottomMainView.addGestureRecognizer(panRecognizer)
     }
 
-    private func animateTransitionIfNeeded(to state: StateBottomView, duration: TimeInterval) {
+    private func animateTransitionIfNeeded(to state: BottomViewState, duration: TimeInterval) {
         guard runningAnimators.isEmpty else { return }
 
-        let transitionAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 1, animations: {
-            switch state {
-            case .open:
-                self.bottomConstraintBottomImageView.constant = 0
-            case .closed:
-                self.bottomConstraintBottomImageView.constant = self.popUpOffset
-            }
-            self.view.layoutIfNeeded()
-        })
+        let transitionAnimator = UIViewPropertyAnimator(
+            duration: duration,
+            dampingRatio: 1,
+            animations: { [weak self] () -> Void in
+                guard let self = self else { return }
+                switch state {
+                case .open:
+                    self.bottomConstraintBottomImageView.constant = 0
+                case .closed:
+                    self.bottomConstraintBottomImageView.constant = self.popUpOffset
+                }
+                self.view.layoutIfNeeded()
+            })
 
-        transitionAnimator.addCompletion { position in
+        transitionAnimator.addCompletion { [weak self] position in
+            guard let self = self else { return }
             switch position {
             case .start:
-                self.currentBottomViewState = state.opposite
+                self.currentStateBottomView = state.opposite
             case .end:
-                self.currentBottomViewState = state
+                self.currentStateBottomView = state
             case .current:
                 ()
             @unknown default:
                 fatalError()
             }
 
-            switch self.currentBottomViewState {
+            switch self.currentStateBottomView {
             case .open:
                 self.bottomConstraintBottomImageView.constant = 0
             case .closed:
@@ -233,17 +271,19 @@ final class MainViewController: UIViewController {
 
     // MARK: - Object Methods
 
-    @objc private func popUpViewPanned(recognizer: UIPanGestureRecognizer) {
+    @objc
+    private func popUpViewPanned(recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
         case .began:
-            animateTransitionIfNeeded(to: currentBottomViewState.opposite, duration: 1)
+            animateTransitionIfNeeded(to: currentStateBottomView.opposite, duration: 1)
             runningAnimators.forEach { $0.pauseAnimation() }
             animationProgress = runningAnimators.map { $0.fractionComplete }
         case .changed:
+            guard let firstElementInRunningAnimators = runningAnimators.first else { return }
             let translation = recognizer.translation(in: bottomMainView)
             var fraction = -translation.y / popUpOffset
-            if currentBottomViewState == .open { fraction *= -1 }
-            if runningAnimators[0].isReversed { fraction *= -1 }
+            if currentStateBottomView == .open { fraction *= -1 }
+            if firstElementInRunningAnimators.isReversed { fraction *= -1 }
             for (index, animator) in runningAnimators.enumerated() {
                 animator.fractionComplete = fraction + animationProgress[index]
             }
@@ -251,33 +291,45 @@ final class MainViewController: UIViewController {
             let yVelocity = recognizer.velocity(in: bottomMainView).y
             let shouldClose = yVelocity > 0
             if yVelocity == 0 {
-                runningAnimators.forEach { $0.continueAnimation(withTimingParameters: nil, durationFactor: 0) }
+                runningAnimators.forEach {
+                    $0.continueAnimation(withTimingParameters: nil, durationFactor: 0)
+                }
                 break
             }
-
-            switch currentBottomViewState {
+            guard let firstElementInRunningAnimators = runningAnimators.first else { return }
+            switch currentStateBottomView {
             case .open:
-                if !shouldClose && !runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
-                if shouldClose && runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+                if !shouldClose && !firstElementInRunningAnimators.isReversed {
+                    runningAnimators.forEach { $0.isReversed = !$0.isReversed }
+                }
+                if shouldClose && firstElementInRunningAnimators.isReversed {
+                    runningAnimators.forEach { $0.isReversed = !$0.isReversed }
+                }
             case .closed:
-                if shouldClose && !runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
-                if !shouldClose && runningAnimators[0].isReversed { runningAnimators.forEach { $0.isReversed = !$0.isReversed } }
+                if shouldClose && !firstElementInRunningAnimators.isReversed {
+                    runningAnimators.forEach { $0.isReversed = !$0.isReversed }
+                }
+                if !shouldClose && firstElementInRunningAnimators.isReversed {
+                    runningAnimators.forEach { $0.isReversed = !$0.isReversed }
+                }
             }
 
-            runningAnimators.forEach { $0.continueAnimation(withTimingParameters: nil, durationFactor: 0) }
+            runningAnimators.forEach {
+                $0.continueAnimation(withTimingParameters: nil, durationFactor: 0)
+            }
         default:
-            ()
+            break
         }
     }
 }
 
-// MARK: - create UICollectionViewCompositionalLayout
+// MARK: - UICollectionViewCompositionalLayout
 
 extension MainViewController {
     private func createLayout() -> UICollectionViewCompositionalLayout {
         UICollectionViewCompositionalLayout { [weak self] sectionIndex, _ in
             guard let self = self else { return nil }
-            let section = self.viewModel[sectionIndex]
+            let section = self.internshipSections[sectionIndex]
             switch section.id {
             case 0:
                 return self.createTopLayout()
@@ -286,57 +338,73 @@ extension MainViewController {
             }
         }
     }
-    
+
     private func createTopLayout() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(
-            layoutSize: NSCollectionLayoutSize(widthDimension: .estimated(70),
-                                               heightDimension: .fractionalHeight(1)))
-
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .estimated(Constants.Layout.itemWidth),
+                heightDimension: .fractionalHeight(Constants.Layout.itemHeight)
+            )
+        )
 
         let group = NSCollectionLayoutGroup.horizontal(
-            layoutSize: NSCollectionLayoutSize(widthDimension: .estimated(630),
-                                               heightDimension: .absolute(44)),
-            subitems: [item])
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .estimated(Constants.Layout.firstSectionGroupWidth),
+                heightDimension: .absolute(Constants.Layout.firstSectionGroupHeight)
+            ),
+            subitems: [item]
+        )
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .continuous
-        section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0)
+        section.contentInsets = Constants.EdgeInsets.firstSection
 
         let layoutSectionHeader = createSectionHeader()
         section.boundarySupplementaryItems = [layoutSectionHeader]
-        section.interGroupSpacing = 12
+        section.interGroupSpacing = Constants.Layout.interSpacing
         return section
     }
-    
+
     private func createBotLayout() -> NSCollectionLayoutSection {
         let item = NSCollectionLayoutItem(
-            layoutSize: NSCollectionLayoutSize(widthDimension: .estimated(70),
-                                               heightDimension: .absolute(44)))
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .estimated(Constants.Layout.itemWidth),
+                heightDimension: .fractionalHeight(Constants.Layout.itemHeight)
+            )
+        )
 
         let verticalGroup = NSCollectionLayoutGroup.horizontal(
-            layoutSize: NSCollectionLayoutSize(widthDimension: .estimated(400),
-                                               heightDimension: .absolute(44)),
-            subitems: [item, item, item, item, item])
-        verticalGroup.interItemSpacing = .fixed(12)
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .estimated(Constants.Layout.secondSectionGroupWidth),
+                heightDimension: .absolute(Constants.Layout.secondSectionGroupHeight)
+            ),
+            subitems: [item, item, item, item, item]
+        )
+        verticalGroup.interItemSpacing = .fixed(Constants.Layout.interSpacing)
         
         let nestedGroup = NSCollectionLayoutGroup.vertical(
-            layoutSize: NSCollectionLayoutSize(widthDimension: .estimated(400),
-                                               heightDimension: .absolute(100)),
-            subitems: [verticalGroup, verticalGroup])
-        nestedGroup.interItemSpacing = .fixed(12)
-    
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .estimated(Constants.Layout.secondSectionNestedGroupWidth),
+                heightDimension: .absolute(Constants.Layout.secondSectionNestedGroupHeight)
+            ),
+            subitems: [verticalGroup, verticalGroup]
+        )
+        nestedGroup.interItemSpacing = .fixed(Constants.Layout.interSpacing)
+
         let section = NSCollectionLayoutSection(group: nestedGroup)
         section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
-        section.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 0, bottom: 0, trailing: 0)
+        section.contentInsets = Constants.EdgeInsets.secondSection
 
         let layoutSectionHeader = createSectionHeader()
         section.boundarySupplementaryItems = [layoutSectionHeader]
-        section.interGroupSpacing = 12
+        section.interGroupSpacing = Constants.Layout.interSpacing
         return section
     }
 
     func createSectionHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
-        let layoutSectionHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1),
-                                                             heightDimension: .estimated(104))
+        let layoutSectionHeaderSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(Constants.Layout.headerWidth),
+            heightDimension: .estimated(Constants.Layout.headerHeight)
+        )
         let layoutSectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: layoutSectionHeaderSize,
             elementKind: UICollectionView.elementKindSectionHeader,
@@ -349,32 +417,36 @@ extension MainViewController {
 
 extension MainViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        viewModel.count
+        internshipSections.count
     }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        viewModel[section].items.count
+        internshipSections[section].items.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: Constants.Text.directionCell,
+            withReuseIdentifier: Constants.Text.directionCellIdentifier,
             for: indexPath) as? DirectionCollectionViewCell else {
             return UICollectionViewCell()
         }
-        cell.configure(with: viewModel[indexPath.section].items[indexPath.row])
+        cell.configure(with: internshipSections[indexPath.section].items[indexPath.row])
+        if lastSelectedIndexes[indexPath.section] == indexPath.row {
+            cell.setSelection(.selected)
+        }
         return cell
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         switch kind {
         case UICollectionView.elementKindSectionHeader:
             guard let header = collectionView.dequeueReusableSupplementaryView(
                 ofKind: kind,
-                withReuseIdentifier: Constants.Text.sectionHeader,
+                withReuseIdentifier: Constants.Text.sectionHeaderIdentifier,
                 for: indexPath) as? SectionHeaderCollectionReusableView else {
                 return UICollectionReusableView()
             }
-            header.configure(with: viewModel[indexPath.section])
+            header.configure(with: internshipSections[indexPath.section])
             return header
         default:
             return UICollectionReusableView()
@@ -386,23 +458,54 @@ extension MainViewController: UICollectionViewDataSource {
 
 extension MainViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-
+        presenter?.didTapItem(indexPath: indexPath)
     }
 }
 
 // MARK: - MainViewProtocol
 
 extension MainViewController: MainViewProtocol {
-    func loadViewModel(viewModel: [Internship]) {
-        self.viewModel = viewModel
+    func loadViewModel(viewModel: [InternshipSection]) {
+        self.internshipSections = viewModel
         collectionView.reloadData()
     }
-    
+
     func showAlert() {
-        let alert = UIAlertController(title: Constants.Text.alertTitle,
-                                      message: Constants.Text.alertMessage,
-                                      preferredStyle: .alert)
+        let alert = UIAlertController(
+            title: Constants.Text.alertTitle,
+            message: Constants.Text.alertMessage,
+            preferredStyle: .alert
+        )
         alert.addAction(UIAlertAction(title: Constants.Text.alertClose, style: .cancel))
         present(alert, animated: true, completion: nil)
+    }
+
+    func moveCellAndUpdateViewModel(indexPath: IndexPath, updateViewModel: [InternshipSection]) {
+        self.internshipSections = updateViewModel
+        if let cell = collectionView.cellForItem(at: indexPath) as? DirectionCollectionViewCell {
+            cell.toggleSelection()
+            let section = indexPath.section
+            if let lastSelectedCellIndex = lastSelectedIndexes[section],
+               lastSelectedCellIndex != indexPath.row,
+               let lastSelectedCell = collectionView.cellForItem(
+                at: IndexPath(
+                    row: lastSelectedCellIndex,
+                    section: section)) as? DirectionCollectionViewCell {
+                lastSelectedCell.toggleSelection()
+            }
+            let newIndex = 0
+            collectionView.moveItem(
+                at: indexPath,
+                to: IndexPath(row: 0, section: indexPath.section)
+            )
+            collectionView.scrollToItem(
+                at: IndexPath(item: newIndex, section: indexPath.section),
+                at: .left,
+                animated: true
+            )
+            lastSelectedIndexes[section] = cell.currentSelectionState == .selected
+            ? newIndex
+            : nil
+        }
     }
 }

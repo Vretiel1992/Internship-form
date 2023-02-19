@@ -23,11 +23,11 @@ extension UILabel {
             paragraphStyle.lineBreakMode = lineBreakMode
             paragraphStyle.alignment = alignment
             self.numberOfLines = numberOfLines
-            self.attributedText = NSMutableAttributedString(
+            self.font = font
+            self.textColor = textColor
+            self.attributedText = NSAttributedString(
                 string: title,
                 attributes: [
-                    NSAttributedString.Key.font: font,
-                    NSAttributedString.Key.foregroundColor: textColor,
                     NSAttributedString.Key.paragraphStyle: paragraphStyle
                 ])
         }

@@ -1,5 +1,5 @@
 //
-//  Internship.swift
+//  InternshipSection.swift
 //  TestTaskSurf
 //
 //  Created by Антон Денисюк on 10.02.2023.
@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct Internship: Hashable {
+struct InternshipSection: Hashable {
     let id: Int
     let title: String
     let subTitle: String
-    let items: [Direction]
+    var items: [Direction]
 
-    static let viewModel: [Internship] = [
-        Internship(
+    static let internshipSections: [InternshipSection] = [
+        InternshipSection(
             id: 0,
             title: "Стажировка в Surf",
             subTitle: "Работай над реальными задачами под руководством опытного наставника и получи возможность стать частью команды мечты. ",
@@ -29,7 +29,7 @@ struct Internship: Hashable {
                 Direction(title: "Frontend"),
                 Direction(title: "ML")
             ]),
-        Internship(
+        InternshipSection(
             id: 1,
             title: "",
             subTitle: "Получай стипендию, выстраивай удобный график, работай на современном железе. ",
@@ -44,5 +44,5 @@ struct Internship: Hashable {
                 Direction(title: "Frontend"),
                 Direction(title: "ML")
             ])
-        ]
+    ]
 }

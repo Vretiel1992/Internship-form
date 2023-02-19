@@ -9,9 +9,18 @@ import UIKit
 
 class DirectionCollectionViewCell: UICollectionViewCell {
 
+    enum SelectionState {
+        case selected
+        case notSelected
+    }
+
+    // MARK: - Public Properties
+
+    var currentSelectionState: SelectionState = .notSelected
+
     // MARK: - Private Properties
 
-    private lazy var directionLabel = UILabel()
+    private let titleLabel = UILabel()
 
     // MARK: - Initializers
 
@@ -25,24 +34,16 @@ class DirectionCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Override Properties
-
-    override var isSelected: Bool {
-        didSet {
-            if isSelected {
-                contentView.backgroundColor = Constants.Colors.darkColor
-                directionLabel.textColor = .white
-            } else {
-                contentView.backgroundColor = Constants.Colors.lightGrayColor
-                directionLabel.textColor = Constants.Colors.darkColor
-            }
-        }
+    // MARK: - Override Methods
+    
+    override func prepareForReuse() {
+        setSelection(.notSelected)
     }
 
     // MARK: - Public Methods
 
     func configure(with direction: Direction) {
-        directionLabel.setupConfigure(
+        titleLabel.setupConfigure(
             title: direction.title,
             lineHeightMultiple: 1.0,
             maximumLineHeight: 20,
@@ -50,33 +51,59 @@ class DirectionCollectionViewCell: UICollectionViewCell {
             alignment: .center,
             numberOfLines: 1,
             font: Constants.Fonts.SFProDisplay14Medium,
-            textColor: Constants.Colors.darkColor)
+            textColor: Constants.Colors.darkColor
+        )
     }
 
+    func toggleSelection() {
+        switch currentSelectionState {
+        case .selected:
+            setSelection(.notSelected)
+        case .notSelected:
+            setSelection(.selected)
+        }
+    }
+
+    func setSelection(_ state: SelectionState) {
+        switch state {
+        case .selected:
+            contentView.backgroundColor = Constants.Colors.darkColor
+            titleLabel.textColor = .white
+            currentSelectionState = .selected
+        case .notSelected:
+            contentView.backgroundColor = Constants.Colors.lightGrayColor
+            titleLabel.textColor = Constants.Colors.darkColor
+            currentSelectionState = .notSelected
+        }
+    }
     // MARK: - Private Methods
 
     private func setupViews() {
         layer.cornerRadius = 12
         clipsToBounds = true
         contentView.backgroundColor = Constants.Colors.lightGrayColor
-        contentView.addSubview(directionLabel)
+        contentView.addSubview(titleLabel)
     }
-
+    
     private func setupConstraints() {
-        directionLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            directionLabel.leadingAnchor.constraint(
+            titleLabel.leadingAnchor.constraint(
                 equalTo: contentView.leadingAnchor,
-                constant: 24),
-            directionLabel.trailingAnchor.constraint(
+                constant: Constants.Layout.titleLabelItemLeftAndRight
+            ),
+            titleLabel.trailingAnchor.constraint(
                 equalTo: contentView.trailingAnchor,
-                constant: -24),
-            directionLabel.topAnchor.constraint(
+                constant: -Constants.Layout.titleLabelItemLeftAndRight
+            ),
+            titleLabel.topAnchor.constraint(
                 equalTo: contentView.topAnchor,
-                constant: 12),
-            directionLabel.bottomAnchor.constraint(
+                constant: Constants.Layout.titleLabelItemTopAndBot
+            ),
+            titleLabel.bottomAnchor.constraint(
                 equalTo: contentView.bottomAnchor,
-                constant: -12)
+                constant: -Constants.Layout.titleLabelItemTopAndBot
+            )
         ])
     }
 }

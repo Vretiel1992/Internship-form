@@ -7,11 +7,11 @@
 
 import UIKit
 
-class SectionHeaderCollectionReusableView: UICollectionReusableView {
+final class SectionHeaderCollectionReusableView: UICollectionReusableView, UIScrollViewDelegate {
 
     // MARK: - Private Properties
 
-    private lazy var stackView: UIStackView = {
+    private let stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.spacing = 12
@@ -19,8 +19,8 @@ class SectionHeaderCollectionReusableView: UICollectionReusableView {
         return stackView
     }()
 
-    private lazy var internshipInSurfLabel = UILabel()
-    private lazy var workOnRealTasksLabel = UILabel()
+    private let titleLabel = UILabel()
+    private let subtitleLabel = UILabel()
 
     // MARK: - Initializers
 
@@ -36,8 +36,8 @@ class SectionHeaderCollectionReusableView: UICollectionReusableView {
 
     // MARK: - Public Methods
 
-    func configure(with section: Internship) {
-        internshipInSurfLabel.setupConfigure(
+    func configure(with section: InternshipSection) {
+        titleLabel.setupConfigure(
             title: section.title,
             lineHeightMultiple: 1.12,
             maximumLineHeight: 32,
@@ -45,8 +45,9 @@ class SectionHeaderCollectionReusableView: UICollectionReusableView {
             alignment: .left,
             numberOfLines: 1,
             font: Constants.Fonts.SFProDisplay24Bold,
-            textColor: Constants.Colors.darkColor)
-        workOnRealTasksLabel.setupConfigure(
+            textColor: Constants.Colors.darkColor
+        )
+        subtitleLabel.setupConfigure(
             title: section.subTitle,
             lineHeightMultiple: 1.2,
             maximumLineHeight: 20,
@@ -54,15 +55,16 @@ class SectionHeaderCollectionReusableView: UICollectionReusableView {
             alignment: .left,
             numberOfLines: 0,
             font: Constants.Fonts.SFProDisplay14Regular,
-            textColor: Constants.Colors.grayColor)
+            textColor: Constants.Colors.grayColor
+        )
     }
 
     // MARK: - Private Methods
 
     private func setupViews() {
         addSubview(stackView)
-        stackView.addArrangedSubview(internshipInSurfLabel)
-        stackView.addArrangedSubview(workOnRealTasksLabel)
+        stackView.addArrangedSubview(titleLabel)
+        stackView.addArrangedSubview(subtitleLabel)
     }
 
     private func setupConstraints() {
@@ -70,7 +72,7 @@ class SectionHeaderCollectionReusableView: UICollectionReusableView {
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
 }

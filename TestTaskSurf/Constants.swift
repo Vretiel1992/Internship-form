@@ -15,14 +15,14 @@ enum Constants {
     }
 
     enum Text {
-        static let sendRequest = "Отправить заявку"
-        static let internshipInSurf = "Стажировка в Surf"
-        static let workOnRealTasks = "Работай над реальными задачами под руководством опытного наставника и получи возможность стать частью команды мечты. "
-        static let getAScholarship = "Получай стипендию, выстраивай удобный график, работай на современном железе. "
-        static let doYouWantToJoinUs = "Хочешь к нам?"
+        static let firstSectionHeaderTitle = "Стажировка в Surf"
+        static let firstSectionHeaderSubtitle = "Работай над реальными задачами под руководством опытного наставника и получи возможность стать частью команды мечты. "
+        static let secondSectionHeaderSubtitle = "Получай стипендию, выстраивай удобный график, работай на современном железе. "
+        static let bottomLabelTitle = "Хочешь к нам?"
+        static let bottomButtonTitle = "Отправить заявку"
         static let empty = ""
-        static let directionCell = "directionCell"
-        static let sectionHeader = "sectionHeader"
+        static let directionCellIdentifier = "directionCell"
+        static let sectionHeaderIdentifier = "sectionHeader"
         static let alertTitle = "Поздравляем!"
         static let alertMessage = "Ваша заявка успешно отправлена!"
         static let alertClose = "Закрыть"
@@ -36,6 +36,37 @@ enum Constants {
     }
 
     enum Images {
-        static let mainImage = UIImage(named: "mainBackgroundImage")
+        static let mainBackgroundImage = UIImage(named: "mainBackgroundImage")
+    }
+
+    enum Layout {
+        static let titleLabelItemLeftAndRight: CGFloat = 24
+        static let titleLabelItemTopAndBot: CGFloat = 12
+        static let aspectRatioToHeight: CGFloat = 1.6373
+        static let bottomMainViewHeight: CGFloat = 510
+        static let collectionViewHeight: CGFloat = 336
+        static let collectionViewLeftAndRight: CGFloat = 20
+        static let collectionViewTop: CGFloat = 24
+        static let bottomStackViewHeight: CGFloat = 60
+        static let bottomStackViewLeftAndRight: CGFloat = 20
+        static let bottomStackViewBot: CGFloat = 58
+        static let bottomLabelWidth: CGFloat = 92
+        static let bottomButtonWidth: CGFloat = 219
+        static let interSpacing: CGFloat = 12
+        static let itemWidth: CGFloat = 70
+        static let itemHeight: CGFloat = 1
+        static let firstSectionGroupWidth: CGFloat = 630
+        static let firstSectionGroupHeight: CGFloat = 44
+        static let secondSectionGroupWidth: CGFloat = 400
+        static let secondSectionGroupHeight: CGFloat = 44
+        static let secondSectionNestedGroupWidth: CGFloat = 400
+        static let secondSectionNestedGroupHeight: CGFloat = 100
+        static let headerWidth: CGFloat = 1
+        static let headerHeight: CGFloat = 104
+    }
+
+    enum EdgeInsets {
+        static let firstSection = NSDirectionalEdgeInsets(top: 12, leading: 0, bottom: 12, trailing: 0)
+        static let secondSection = NSDirectionalEdgeInsets(top: 12, leading: 0, bottom: 0, trailing: 0)
     }
 }
