@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E43005AB299BA40500495DFA /* MainViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43005AA299BA40500495DFA /* MainViewPresenter.swift */; };
-		E43005AE299BAC7C00495DFA /* AssemblyBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43005AD299BAC7C00495DFA /* AssemblyBuilder.swift */; };
+		E43005AE299BAC7C00495DFA /* Assembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43005AD299BAC7C00495DFA /* Assembly.swift */; };
 		E4CB7DAE2995109600E1B5AE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB7DAD2995109600E1B5AE /* AppDelegate.swift */; };
 		E4CB7DB02995109600E1B5AE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB7DAF2995109600E1B5AE /* SceneDelegate.swift */; };
 		E4CB7DB22995109600E1B5AE /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4CB7DB12995109600E1B5AE /* MainViewController.swift */; };
@@ -27,18 +27,18 @@
 
 /* Begin PBXFileReference section */
 		E43005AA299BA40500495DFA /* MainViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewPresenter.swift; sourceTree = "<group>"; };
-		E43005AD299BAC7C00495DFA /* AssemblyBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyBuilder.swift; sourceTree = "<group>"; };
+		E43005AD299BAC7C00495DFA /* Assembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Assembly.swift; path = AssemblyLayer/Assembly.swift; sourceTree = "<group>"; };
 		E4CB7DAA2995109600E1B5AE /* TestTaskSurf.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestTaskSurf.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E4CB7DAD2995109600E1B5AE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		E4CB7DAF2995109600E1B5AE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		E4CB7DB12995109600E1B5AE /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		E4CB7DAD2995109600E1B5AE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Application/AppDelegate.swift; sourceTree = "<group>"; };
+		E4CB7DAF2995109600E1B5AE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = Application/SceneDelegate.swift; sourceTree = "<group>"; };
+		E4CB7DB12995109600E1B5AE /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MainViewController.swift; path = View/MainViewController.swift; sourceTree = "<group>"; };
 		E4CB7DB62995109800E1B5AE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E4CB7DB92995109800E1B5AE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		E4CB7DBB2995109800E1B5AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E4D5ECBD2999B1CD00999088 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		E4D5ECC02999B21D00999088 /* SFProDisplay-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Medium.ttf"; sourceTree = "<group>"; };
-		E4D5ECC12999B21D00999088 /* SFProDisplay-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Regular.ttf"; sourceTree = "<group>"; };
-		E4D5ECC22999B21D00999088 /* SFProDisplay-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "SFProDisplay-Bold.ttf"; sourceTree = "<group>"; };
+		E4CB7DBB2995109800E1B5AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Application/Info.plist; sourceTree = "<group>"; };
+		E4D5ECBD2999B1CD00999088 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Constants.swift; path = Application/Constants.swift; sourceTree = "<group>"; };
+		E4D5ECC02999B21D00999088 /* SFProDisplay-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "SFProDisplay-Medium.ttf"; path = "Fonts/SFProDisplay-Medium.ttf"; sourceTree = "<group>"; };
+		E4D5ECC12999B21D00999088 /* SFProDisplay-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "SFProDisplay-Regular.ttf"; path = "Fonts/SFProDisplay-Regular.ttf"; sourceTree = "<group>"; };
+		E4D5ECC22999B21D00999088 /* SFProDisplay-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "SFProDisplay-Bold.ttf"; path = "Fonts/SFProDisplay-Bold.ttf"; sourceTree = "<group>"; };
 		E4D5ECC62999B26500999088 /* InternshipSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternshipSection.swift; sourceTree = "<group>"; };
 		E4D5ECC82999B2C600999088 /* Direction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Direction.swift; sourceTree = "<group>"; };
 		E4D5ECCB2999B35800999088 /* UILabel+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+.swift"; sourceTree = "<group>"; };
@@ -60,7 +60,7 @@
 		E43005AC299BAC5900495DFA /* AssemblyLayer */ = {
 			isa = PBXGroup;
 			children = (
-				E43005AD299BAC7C00495DFA /* AssemblyBuilder.swift */,
+				E43005AD299BAC7C00495DFA /* Assembly.swift */,
 			);
 			name = AssemblyLayer;
 			sourceTree = "<group>";
@@ -98,7 +98,8 @@
 				E4D5ECBF2999B20000999088 /* Fonts */,
 				E4CB7DB62995109800E1B5AE /* Assets.xcassets */,
 			);
-			path = Resources;
+			name = Resources;
+			path = Application/Resources;
 			sourceTree = "<group>";
 		};
 		E4D5ECB52999B02200999088 /* Application */ = {
@@ -129,7 +130,8 @@
 				E4D5ECB92999B10200999088 /* View */,
 				E4D5ECBA2999B10A00999088 /* Presenter */,
 			);
-			path = MainModule;
+			name = MainModule;
+			path = PresentationLayer/MainModule;
 			sourceTree = "<group>";
 		};
 		E4D5ECB82999B0FA00999088 /* Model */ = {
@@ -164,7 +166,8 @@
 				E4D5ECCD2999B38E00999088 /* SectionHeaderCollectionReusableView.swift */,
 				E4D5ECCF2999B3BD00999088 /* DirectionCollectionViewCell.swift */,
 			);
-			path = ComponentsView;
+			name = ComponentsView;
+			path = View/ComponentsView;
 			sourceTree = "<group>";
 		};
 		E4D5ECBF2999B20000999088 /* Fonts */ = {
@@ -258,7 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E43005AE299BAC7C00495DFA /* AssemblyBuilder.swift in Sources */,
+				E43005AE299BAC7C00495DFA /* Assembly.swift in Sources */,
 				E4D5ECC72999B26500999088 /* InternshipSection.swift in Sources */,
 				E4CB7DB22995109600E1B5AE /* MainViewController.swift in Sources */,
 				E43005AB299BA40500495DFA /* MainViewPresenter.swift in Sources */,
@@ -281,6 +284,7 @@
 				E4CB7DB92995109800E1B5AE /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			path = Application;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -409,7 +413,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MV29L5KM63;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TestTaskSurf/Info.plist;
+				INFOPLIST_FILE = TestTaskSurf/Application/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -436,7 +440,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = MV29L5KM63;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = TestTaskSurf/Info.plist;
+				INFOPLIST_FILE = TestTaskSurf/Application/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
