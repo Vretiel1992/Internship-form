@@ -7,11 +7,11 @@
 
 import UIKit
 
-protocol AssemblyBuilderProtocol {
+protocol AssemblyProtocol {
     func createMainModule() -> UIViewController
 }
 
-final class AssemblyBuilder: AssemblyBuilderProtocol {
+final class Assembly: AssemblyProtocol {
     func createMainModule() -> UIViewController {
         let view = MainViewController()
         let presenter = MainViewPresenter(view: view)
